@@ -1,0 +1,94 @@
+package com.app.service;
+
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.app.dao.ReminderRepository;
+import com.app.pojo.Reminder;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
+
+
+@Service
+@Transactional
+public class ReminderService {
+    String twilioAccountSid = "AC1c14423ae7d79c868755c5835fc5ac96";
+    String twilioAuthToken = "4e66eca8c5add9b5399a4059ffee5b08";
+    String twilioPhoneNumber = "+13613155486";
+
+	@Autowired
+	private ReminderRepository remainRepo;
+	
+	public void sendReminder(String phoneNumber, String message) {
+		System.out.println("Message method");
+		LocalTime morningReminder = LocalTime.of(10,0);
+		LocalTime afternoonReminder = LocalTime.of(14,0);
+		LocalTime eveningReminder = LocalTime.of(21,0);
+		LocalTime currentTime = LocalTime.now();
+		LocalTime testTime = LocalTime.of(17,40);
+		Twilio.init(twilioAccountSid, twilioAuthToken);
+		Message msg;
+		
+		if(currentTime.equals(morningReminder)) {
+			msg = Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(twilioPhoneNumber), message).create();
+			System.out.println(msg.getSid());
+		}else if(currentTime.equals(afternoonReminder)) {
+			msg = Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(twilioPhoneNumber), message).create();
+			System.out.println(msg.getSid());
+		}else if(currentTime.equals(eveningReminder)) {
+			msg = Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(twilioPhoneNumber), message).create();
+			System.out.println(msg.getSid());
+		}
+		
+		if(currentTime.equals(testTime)) {
+			msg = Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(twilioPhoneNumber), message).create();
+			System.out.println(msg.getSid());
+		}
+    }
+	
+	public Reminder getRemainById(Long id) {
+		return remainRepo.getReferenceById(id);
+	}
+	
+	public List<Reminder> getAllRemainders(){
+		return remainRepo.findAll();
+	}
+	
+	public Reminder createReminder(Reminder reminder) {
+		return remainRepo.save(reminder);
+	}
+	
+	public Reminder updateRemainder(Reminder upRemind) {
+		Optional<Reminder> exRemind = remainRepo.findById(upRemind.getId());
+		if(exRemind.isPresent()) {
+			Reminder rm = exRemind.get();
+			rm.setTitle(upRemind.getTitle());
+			rm.setDescription(upRemind.getDescription());
+			rm.setDueTime(upRemind.getDueTime());
+			rm.setStatusComplete(upRemind.isStatusComplete());		
+			return remainRepo.save(rm);
+		}
+		return null;
+	}
+	
+	public Object deleteReminder(Long id) {
+        Optional<Reminder> existingReminder = remainRepo.findById(id);
+        if (existingReminder.isPresent()) {
+            remainRepo.deleteById(id);
+            return id;
+        }
+        return "user not present in database with this id";
+    }
+
+	public void saveReminder(Reminder reminder) {
+		remainRepo.save(reminder);
+	}
+	
+}

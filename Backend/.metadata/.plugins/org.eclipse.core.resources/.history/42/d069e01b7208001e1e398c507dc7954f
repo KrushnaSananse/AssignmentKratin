@@ -1,0 +1,14 @@
+package com.app.dao;
+
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.app.pojo.Nutrition;
+import com.app.pojo.User;
+
+public interface NutritionRepository extends JpaRepository<Nutrition, Long> {
+	
+	
+}

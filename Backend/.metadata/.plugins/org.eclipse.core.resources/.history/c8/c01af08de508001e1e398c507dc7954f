@@ -1,0 +1,75 @@
+package com.app.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.app.dao.ReminderRepository;
+import com.app.pojo.Reminder;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
+
+
+@Service
+@Transactional
+public class ReminderService {
+    private final String twilioPhoneNumber;
+    String twilioAccountSid = "AC1c14423ae7d79c868755c5835fc5ac96";
+    String twilioAuthToken = "4e66eca8c5add9b5399a4059ffee5b08";
+
+
+	@Autowired
+	private ReminderRepository remainRepo;
+
+	public ReminderService(String twilioAccountSid, String twilioAuthToken, String twilioPhoneNumber) {
+        this.twilioAccountSid = twilioAccountSid;
+        this.twilioAuthToken = twilioAuthToken;
+        this.twilioPhoneNumber = twilioPhoneNumber;
+    }
+	
+	public void sendReminder(String phoneNumber, String message) {
+        Twilio.init(twilioAccountSid, twilioAuthToken);
+
+        Message.creator(new PhoneNumber(phoneNumber), new PhoneNumber(twilioPhoneNumber), message).create();
+    }
+	
+	public Reminder getRemainById(Long id) {
+		return remainRepo.getReferenceById(id);
+	}
+	
+	public List<Reminder> getAllRemainders(){
+		return remainRepo.findAll();
+	}
+	
+	public Reminder createReminder(Reminder reminder) {
+		return remainRepo.save(reminder);
+	}
+	
+	public Reminder updateRemainder(Reminder upRemind) {
+		Optional<Reminder> exRemind = remainRepo.findById(upRemind.getId());
+		if(exRemind.isPresent()) {
+			Reminder rm = exRemind.get();
+			rm.setTitle(upRemind.getTitle());
+			rm.setDescription(upRemind.getDescription());
+			rm.setDueTime(upRemind.getDueTime());
+			rm.setStatusComplete(upRemind.isStatusComplete());		
+			return remainRepo.save(rm);
+		}
+		return null;
+	}
+	
+	public Object deleteReminder(Long id) {
+        Optional<Reminder> existingReminder = remainRepo.findById(id);
+        if (existingReminder.isPresent()) {
+            remainRepo.deleteById(id);
+            return id;
+        }
+        return "user not present in database with this id";
+    }
+	
+}

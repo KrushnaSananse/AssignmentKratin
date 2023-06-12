@@ -1,0 +1,30 @@
+package com.app.service;
+
+import java.util.Optional;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.app.dao.UserRepository;
+import com.app.pojo.User;
+
+@Service
+@Transactional
+public class UserService {
+	
+	@Autowired
+	private UserRepository userRepo;
+
+	public Optional<User> fetchUser(String email, String pass) {
+		return userRepo.findByEmailAndPassword(email, pass);
+	}
+
+	public Object addUser(User user) {
+		userRepo.findByEmail(user.getEmail());
+		return null;
+	}
+	
+	
+}
